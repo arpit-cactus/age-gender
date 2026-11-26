@@ -1,0 +1,43 @@
+[Unit]
+Description=VisionCount Backend API (FastAPI + Uvicorn)
+Documentation=https://github.com/arpit-cactus/age-gender
+After=network.target mysql.service mariadb.service
+Wants=mysql.service mariadb.service
+
+[Service]
+Type=simple
+User=arpit
+Group=arpit
+WorkingDirectory=/home/arpit/Desktop/age-gender
+
+# Load environment variables from the project .env file
+EnvironmentFile=/home/arpit/Desktop/age-gender/.env
+
+# Extra env — PUBLIC_URL for CORS whitelist (FRP panel)
+Environment=PUBLIC_URL=http://general.cactusxpo.com
+Environment=FRONTEND_ORIGIN=http://general.cactusxpo.com
+Environment=PYTHONPATH=/home/arpit/Desktop/age-gender
+
+ExecStart=/home/arpit/Desktop/age-gender/backend/.venv/bin/python \
+    -m uvicorn backend.app.main:app \
+    --host 0.0.0.0 \
+    --port 8000 \
+    --workers 2 \
+    --log-level info
+
+# Restart policy — always bring it back up
+Restart=always
+RestartSec=5
+StartLimitInterval=60
+StartLimitBurst=5
+
+# Logging goes to journald (view with: journalctl -u visioncount-backend -f)
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=visioncount-backend
+
+# Raise open-file limit for RTSP connections
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target

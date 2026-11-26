@@ -1,0 +1,36 @@
+[Unit]
+Description=VisionCount Frontend Dashboard (Next.js)
+Documentation=https://github.com/arpit-cactus/age-gender
+After=network.target visioncount-backend.service
+Wants=visioncount-backend.service
+
+[Service]
+Type=simple
+User=arpit
+Group=arpit
+WorkingDirectory=/home/arpit/Desktop/age-gender/frontend
+
+# Point the frontend at the public FRP URL for the API when accessed
+# externally; keep localhost for local backend-to-frontend calls.
+Environment=NODE_ENV=production
+Environment=NEXT_PUBLIC_API_BASE=http://general.cactusxpo.com
+Environment=PORT=3000
+Environment=HOSTNAME=0.0.0.0
+
+# Build must be done before enabling this service (npm run build).
+# The service runs the production server, not the dev watcher.
+ExecStart=/usr/bin/npm run start
+
+Restart=always
+RestartSec=5
+StartLimitInterval=60
+StartLimitBurst=5
+
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=visioncount-frontend
+
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target
