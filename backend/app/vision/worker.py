@@ -450,16 +450,16 @@ class CameraWorker:
                             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 180), 1, cv2.LINE_AA
                         )
 
-                        # Optimize stream frame: downscale to max 854px width (480p) and encode at 65 quality
-                        # Reduces frame size from ~250KB to ~30KB for rock-solid 5-7 FPS over FRP/tunnel
+                        # Optimize stream frame: downscale to max 1024px width and encode at 70 quality
+                        # Delivers crisp clarity on fullscreen monitors while keeping bandwidth light (~40KB/frame)
                         stream_frame = annotated
                         sh, sw = stream_frame.shape[:2]
-                        if sw > 854:
-                            scale = 854.0 / sw
-                            stream_frame = cv2.resize(stream_frame, (854, int(sh * scale)), interpolation=cv2.INTER_AREA)
+                        if sw > 1024:
+                            scale = 1024.0 / sw
+                            stream_frame = cv2.resize(stream_frame, (1024, int(sh * scale)), interpolation=cv2.INTER_AREA)
 
                         # Encode JPEG for live stream
-                        success, enc = cv2.imencode(".jpg", stream_frame, [int(cv2.IMWRITE_JPEG_QUALITY), 65])
+                        success, enc = cv2.imencode(".jpg", stream_frame, [int(cv2.IMWRITE_JPEG_QUALITY), 70])
                         if success:
                             with self._monitor_lock:
                                 self._latest_annotated_frame = enc.tobytes()

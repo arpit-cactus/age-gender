@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { Camera, api } from "@/lib/api";
 import {
   X,
@@ -14,6 +14,8 @@ import {
   Maximize2,
   Minimize2,
   RefreshCw,
+  Expand,
+  Shrink,
 } from "lucide-react";
 
 interface LiveMonitorModalProps {
@@ -27,8 +29,11 @@ export function LiveMonitorModal({ camera, isOpen, onClose }: LiveMonitorModalPr
   const [streamUrl, setStreamUrl] = useState<string>("");
   const [copied, setCopied] = useState<boolean>(false);
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
+  const [fitMode, setFitMode] = useState<"contain" | "cover">("contain");
   const [isLoadingFeed, setIsLoadingFeed] = useState<boolean>(true);
   const [feedError, setFeedError] = useState<boolean>(false);
+
+  const modalRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (isOpen && camera) {
@@ -43,29 +48,99 @@ export function LiveMonitorModal({ camera, isOpen, onClose }: LiveMonitorModalPr
     }
   }, [isOpen, camera]);
 
+  // Sync with native HTML5 fullscreen changes (e.g. user pressing ESC or F11)
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      const active = !!(
+        document.fullscreenElement ||
+        (document as any).webkitFullscreenElement ||
+        (document as any).mozFullScreenElement
+      );
+      setIsFullscreen(active);
+    };
+
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    document.addEventListener("webkitfullscreenchange", handleFullscreenChange);
+    document.addEventListener("mozfullscreenchange", handleFullscreenChange);
+
+    return () => {
+      document.removeEventListener("fullscreenchange", handleFullscreenChange);
+      document.removeEventListener("webkitfullscreenchange", handleFullscreenChange);
+      document.removeEventListener("mozfullscreenchange", handleFullscreenChange);
+    };
+  }, []);
+
+  const toggleFullscreen = useCallback(async () => {
+    if (!modalRef.current) return;
+
+    try {
+      const isCurrentlyFs = !!(
+        document.fullscreenElement ||
+        (document as any).webkitFullscreenElement
+      );
+
+      if (!isCurrentlyFs) {
+        if (modalRef.current.requestFullscreen) {
+          await modalRef.current.requestFullscreen();
+        } else if ((modalRef.current as any).webkitRequestFullscreen) {
+          await (modalRef.current as any).webkitRequestFullscreen();
+        } else {
+          setIsFullscreen(true);
+        }
+      } else {
+        if (document.exitFullscreen) {
+          await document.exitFullscreen();
+        } else if ((document as any).webkitExitFullscreen) {
+          await (document as any).webkitExitFullscreen();
+        }
+        setIsFullscreen(false);
+      }
+    } catch {
+      // Browser policy fallback (CSS viewport fullscreen)
+      setIsFullscreen((prev) => !prev);
+    }
+  }, []);
+
   const handleClose = useCallback(() => {
+    if (
+      document.fullscreenElement ||
+      (document as any).webkitFullscreenElement
+    ) {
+      if (document.exitFullscreen) {
+        document.exitFullscreen().catch(() => {});
+      } else if ((document as any).webkitExitFullscreen) {
+        (document as any).webkitExitFullscreen();
+      }
+    }
     setIsStreaming(false);
     setStreamUrl("");
     setIsFullscreen(false);
     onClose();
   }, [onClose]);
 
-  // Handle ESC key to exit fullscreen or dismiss dialog
+  // Handle keyboard shortcuts (ESC, F for fullscreen, Space for pause/resume)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && isOpen) {
+      if (!isOpen) return;
+
+      if (e.key === "Escape") {
         if (isFullscreen) {
-          setIsFullscreen(false);
+          toggleFullscreen();
         } else {
           handleClose();
         }
+      } else if (e.key.toLowerCase() === "f" && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        const target = e.target as HTMLElement;
+        if (target.tagName !== "INPUT" && target.tagName !== "TEXTAREA") {
+          e.preventDefault();
+          toggleFullscreen();
+        }
       }
     };
-    if (isOpen) {
-      window.addEventListener("keydown", handleKeyDown);
-    }
+
+    window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, isFullscreen, handleClose]);
+  }, [isOpen, isFullscreen, handleClose, toggleFullscreen]);
 
   if (!isOpen || !camera) return null;
 
@@ -97,12 +172,13 @@ export function LiveMonitorModal({ camera, isOpen, onClose }: LiveMonitorModalPr
 
   return (
     <div
+      ref={modalRef}
       role="dialog"
       aria-modal="true"
       aria-labelledby="modal-camera-title"
       className={
         isFullscreen
-          ? "fixed inset-0 z-50 bg-black flex flex-col"
+          ? "fixed inset-0 z-50 bg-black flex flex-col w-screen h-screen overflow-hidden select-none"
           : "fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-950/80 backdrop-blur-sm animate-in fade-in duration-150"
       }
       onClick={(e) => {
@@ -112,12 +188,16 @@ export function LiveMonitorModal({ camera, isOpen, onClose }: LiveMonitorModalPr
       <div
         className={
           isFullscreen
-            ? "w-screen h-screen flex flex-col bg-slate-950 text-white overflow-hidden"
+            ? "w-full h-full flex flex-col bg-black text-white overflow-hidden relative"
             : "w-full max-w-5xl h-[86vh] max-h-[820px] flex flex-col bg-slate-900 text-white rounded-2xl shadow-2xl border border-slate-800 overflow-hidden"
         }
       >
         {/* Header */}
-        <header className="flex-shrink-0 px-5 py-3 border-b border-slate-800/80 bg-slate-900/95 flex items-center justify-between gap-4">
+        <header
+          className={`flex-shrink-0 px-4 sm:px-6 py-2.5 border-b border-slate-800/80 flex items-center justify-between gap-3 z-20 ${
+            isFullscreen ? "bg-slate-950/90 backdrop-blur-md" : "bg-slate-900/95"
+          }`}
+        >
           <div className="flex items-center gap-3 min-w-0">
             <div className="h-8 w-8 rounded-lg bg-slate-800 border border-slate-700/80 flex items-center justify-center text-slate-300 flex-shrink-0">
               <Video className="h-4 w-4" />
@@ -127,9 +207,16 @@ export function LiveMonitorModal({ camera, isOpen, onClose }: LiveMonitorModalPr
                 <h2 id="modal-camera-title" className="text-sm font-semibold text-white tracking-tight truncate">
                   {camera.name}
                 </h2>
+                {isFullscreen && (
+                  <span className="hidden sm:inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                    Fullscreen
+                  </span>
+                )}
               </div>
               <div className="flex items-center gap-1.5 text-xs text-slate-400 mt-0.5 truncate">
-                <span className="truncate font-mono text-[11px] text-slate-400">{camera.source}</span>
+                <span className="truncate font-mono text-[11px] text-slate-400 max-w-[280px] sm:max-w-md">
+                  {camera.source}
+                </span>
                 <button
                   type="button"
                   onClick={handleCopySource}
@@ -144,6 +231,27 @@ export function LiveMonitorModal({ camera, isOpen, onClose }: LiveMonitorModalPr
 
           {/* Action Controls */}
           <div className="flex items-center gap-2 flex-shrink-0">
+            {/* Fit / Fill Toggle */}
+            <button
+              type="button"
+              onClick={() => setFitMode(fitMode === "contain" ? "cover" : "contain")}
+              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium text-slate-300 hover:text-white bg-slate-800/80 hover:bg-slate-700 border border-slate-700/80 transition-colors"
+              title={fitMode === "contain" ? "Switch to Fill Screen (Zero black bars)" : "Switch to Fit Screen (Preserve 100% aspect ratio)"}
+            >
+              {fitMode === "contain" ? (
+                <>
+                  <Expand className="h-3.5 w-3.5" />
+                  <span className="hidden sm:inline">Fill Screen</span>
+                </>
+              ) : (
+                <>
+                  <Shrink className="h-3.5 w-3.5" />
+                  <span className="hidden sm:inline">Fit Screen</span>
+                </>
+              )}
+            </button>
+
+            {/* Pause / Resume */}
             <button
               type="button"
               onClick={toggleStream}
@@ -166,21 +274,23 @@ export function LiveMonitorModal({ camera, isOpen, onClose }: LiveMonitorModalPr
               )}
             </button>
 
+            {/* Toggle Fullscreen */}
             <button
               type="button"
-              onClick={() => setIsFullscreen(!isFullscreen)}
+              onClick={toggleFullscreen}
               className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
-              title={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
+              title={isFullscreen ? "Exit Fullscreen (Esc or F)" : "Fullscreen (F)"}
               aria-label="Toggle Fullscreen"
             >
               {isFullscreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
             </button>
 
+            {/* Close Modal */}
             <button
               type="button"
               onClick={handleClose}
               className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
-              title="Close modal"
+              title="Close modal (Esc)"
               aria-label="Close dialog"
             >
               <X className="h-4 w-4" />
@@ -188,8 +298,8 @@ export function LiveMonitorModal({ camera, isOpen, onClose }: LiveMonitorModalPr
           </div>
         </header>
 
-        {/* Video Canvas Container (Flex-1 so it expands to 100% of available height with zero white space) */}
-        <div className="relative flex-1 min-h-0 w-full bg-black flex items-center justify-center overflow-hidden select-none">
+        {/* Video Canvas Container - Takes 100% available area and centers the video cleanly */}
+        <div className="relative flex-1 min-h-0 w-full h-full bg-black flex items-center justify-center overflow-hidden select-none">
           {isStreaming && streamUrl ? (
             <>
               {/* Connecting / Buffering Spinner Overlay */}
@@ -231,7 +341,9 @@ export function LiveMonitorModal({ camera, isOpen, onClose }: LiveMonitorModalPr
                     setIsLoadingFeed(false);
                     setFeedError(true);
                   }}
-                  className="max-h-full max-w-full w-auto h-auto object-contain"
+                  className={`w-full h-full ${
+                    fitMode === "cover" ? "object-cover" : "object-contain"
+                  } transition-all duration-150`}
                 />
               )}
             </>
@@ -258,8 +370,12 @@ export function LiveMonitorModal({ camera, isOpen, onClose }: LiveMonitorModalPr
           )}
         </div>
 
-        {/* Footer Telemetry & Info (Flex-shrink-0 at the bottom with NO white void) */}
-        <footer className="flex-shrink-0 px-5 py-2.5 bg-slate-900/95 border-t border-slate-800/80 flex flex-wrap items-center justify-between text-xs text-slate-400 gap-2">
+        {/* Footer Telemetry & Info */}
+        <footer
+          className={`flex-shrink-0 px-4 sm:px-6 py-2 border-t border-slate-800/80 flex flex-wrap items-center justify-between text-xs text-slate-400 gap-2 z-20 ${
+            isFullscreen ? "bg-slate-950/90 backdrop-blur-md text-[11px]" : "bg-slate-900/95"
+          }`}
+        >
           <div className="flex items-center gap-4">
             <span className="flex items-center gap-1.5 text-slate-300">
               <Activity className="h-3.5 w-3.5 text-indigo-400" />
