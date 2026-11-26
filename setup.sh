@@ -97,6 +97,10 @@ fi
 $MYSQL_CMD -e "CREATE DATABASE IF NOT EXISTS visioncount CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
 echo "   ✓ Database 'visioncount' verified."
 
+# Ensure root@127.0.0.1 has permissions on visioncount (fixes 1044 TCP error on Ubuntu/Debian)
+$MYSQL_CMD -e "CREATE USER IF NOT EXISTS 'root'@'127.0.0.1'; GRANT ALL PRIVILEGES ON visioncount.* TO 'root'@'127.0.0.1'; GRANT ALL PRIVILEGES ON visioncount.* TO 'root'@'localhost'; FLUSH PRIVILEGES;" 2>/dev/null || true
+echo "   ✓ Database privileges granted for root@127.0.0.1."
+
 # Create tables
 $MYSQL_CMD visioncount << 'EOF'
 CREATE TABLE IF NOT EXISTS users (
