@@ -255,7 +255,7 @@ export function LiveMonitorModal({ camera, isOpen, onClose }: LiveMonitorModalPr
             <button
               type="button"
               onClick={toggleStream}
-              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors border ${
+              className={`inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-medium transition-colors border ${
                 isStreaming
                   ? "bg-slate-800 hover:bg-slate-700 text-slate-200 border-slate-700"
                   : "bg-indigo-600 hover:bg-indigo-700 text-white border-indigo-500 shadow-xs"
@@ -264,12 +264,12 @@ export function LiveMonitorModal({ camera, isOpen, onClose }: LiveMonitorModalPr
               {isStreaming ? (
                 <>
                   <Pause className="h-3.5 w-3.5" />
-                  <span>Pause</span>
+                  <span className="hidden sm:inline">Pause</span>
                 </>
               ) : (
                 <>
                   <Play className="h-3.5 w-3.5 fill-current" />
-                  <span>Resume</span>
+                  <span className="hidden sm:inline">Resume</span>
                 </>
               )}
             </button>

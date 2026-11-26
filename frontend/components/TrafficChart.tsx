@@ -60,7 +60,7 @@ export function TrafficChart({ data, isLoading, interval = "hour" }: TrafficChar
   const hasData = formattedData.some((d) => d.IN > 0 || d.OUT > 0);
 
   return (
-    <div className="bg-white p-6 rounded-xl border border-slate-200/80 shadow-xs">
+    <div className="bg-white p-4 sm:p-6 rounded-xl border border-slate-200/80 shadow-xs">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2.5">
           <div className="p-1.5 bg-indigo-50 rounded-lg text-indigo-600">

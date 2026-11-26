@@ -54,7 +54,7 @@ export function EventsTable({ events, isLoading }: EventsTableProps) {
           aria-labelledby="events-table-caption"
           className="overflow-x-auto max-h-96"
         >
-          <table className="w-full text-left border-collapse">
+          <table className="w-full min-w-[640px] text-left border-collapse">
             <caption id="events-table-caption" className="sr-only">
               Latest Count Events Feed
             </caption>

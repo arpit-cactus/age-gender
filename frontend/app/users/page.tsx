@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { api, User } from "@/lib/api";
 import { Sidebar } from "@/components/Sidebar";
+import { MobileMenuButton } from "@/components/MobileMenuButton";
 import { Plus, Trash2, X } from "lucide-react";
 
 export default function UsersPage() {
@@ -93,18 +94,21 @@ export default function UsersPage() {
       <Sidebar currentUser={currentUser} onLogout={handleLogout} />
 
       <div className="flex-1 flex flex-col min-w-0">
-        <header className="h-16 bg-white border-b border-slate-200 px-6 flex items-center justify-between sticky top-0 z-20">
-          <div>
-            <h1 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight">
-              User & Access Management
-            </h1>
-            <p className="text-xs text-slate-400">Configure Administrator and Viewer accounts</p>
+        <header className="h-16 bg-white border-b border-slate-200 px-4 sm:px-6 flex items-center justify-between sticky top-0 z-20">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+            <MobileMenuButton />
+            <div className="min-w-0">
+              <h1 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight truncate">
+                User & Access Management
+              </h1>
+              <p className="text-xs text-slate-400 truncate hidden sm:block">Configure Administrator and Viewer accounts</p>
+            </div>
           </div>
 
           <button
             type="button"
             onClick={() => setShowAddModal(true)}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-lg shadow-xs transition-colors"
+            className="inline-flex items-center gap-1.5 px-3 sm:px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-lg shadow-xs transition-colors flex-shrink-0"
           >
             <Plus className="h-4 w-4" />
             <span>Add User</span>
@@ -112,7 +116,7 @@ export default function UsersPage() {
         </header>
 
         {/* Responsive main container */}
-        <main className="w-full p-5 sm:p-6 lg:p-8 space-y-6">
+        <main className="w-full p-3.5 sm:p-6 lg:p-8 space-y-4 sm:space-y-6">
           <div className="bg-white rounded-xl border border-slate-200/80 shadow-xs overflow-hidden">
             {isLoading ? (
               <div className="p-8 space-y-3 animate-pulse">
@@ -127,7 +131,7 @@ export default function UsersPage() {
                 aria-labelledby="users-table-caption"
                 className="overflow-x-auto"
               >
-                <table className="w-full text-left border-collapse">
+                <table className="w-full min-w-[500px] text-left border-collapse">
                   <caption id="users-table-caption" className="sr-only">
                     Users Directory
                   </caption>

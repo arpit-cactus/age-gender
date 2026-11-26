@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { api, User, Camera } from "@/lib/api";
 import { Sidebar } from "@/components/Sidebar";
+import { MobileMenuButton } from "@/components/MobileMenuButton";
 import { LiveMonitorModal } from "@/components/LiveMonitorModal";
 import {
   Video,
@@ -156,18 +157,21 @@ export default function CamerasPage() {
       <Sidebar currentUser={currentUser} onLogout={handleLogout} />
 
       <div className="flex-1 flex flex-col min-w-0">
-        <header className="h-16 bg-white border-b border-slate-200 px-6 flex items-center justify-between sticky top-0 z-20">
-          <div>
-            <h1 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight">
-              Camera Stream Management
-            </h1>
-            <p className="text-xs text-slate-400">Configure RTSP feeds, counting lines & detection zones</p>
+        <header className="h-16 bg-white border-b border-slate-200 px-4 sm:px-6 flex items-center justify-between sticky top-0 z-20">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+            <MobileMenuButton />
+            <div className="min-w-0">
+              <h1 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight truncate">
+                Camera Stream Management
+              </h1>
+              <p className="text-xs text-slate-400 truncate hidden sm:block">Configure RTSP feeds, counting lines & detection zones</p>
+            </div>
           </div>
 
           <button
             type="button"
             onClick={() => setShowAddModal(true)}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-lg shadow-xs transition-colors"
+            className="inline-flex items-center gap-1.5 px-3 sm:px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-lg shadow-xs transition-colors flex-shrink-0"
           >
             <Plus className="h-4 w-4" />
             <span>Add Camera</span>
@@ -175,7 +179,7 @@ export default function CamerasPage() {
         </header>
 
         {/* Responsive main container */}
-        <main className="w-full p-5 sm:p-6 lg:p-8 space-y-6">
+        <main className="w-full p-3.5 sm:p-6 lg:p-8 space-y-4 sm:space-y-6">
           {isLoading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 animate-pulse">
               {[1, 2, 3].map((i) => (
@@ -277,8 +281,8 @@ export default function CamerasPage() {
                     </div>
 
                     {/* Actions Row */}
-                    <div className="mt-5 pt-4 border-t border-slate-100 flex items-center justify-between gap-2">
-                      <div className="flex items-center gap-2">
+                    <div className="mt-5 pt-4 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2">
+                      <div className="flex flex-wrap items-center gap-2">
                         {isRunning ? (
                           <button
                             type="button"

@@ -35,7 +35,7 @@ export function AgeBarChart({ data, isLoading }: AgeBarChartProps) {
   const totalEntries = data.reduce((acc, curr) => acc + curr.count, 0);
 
   return (
-    <div className="bg-white p-6 rounded-xl border border-slate-200/80 shadow-xs flex flex-col justify-between">
+    <div className="bg-white p-4 sm:p-6 rounded-xl border border-slate-200/80 shadow-xs flex flex-col justify-between">
       <div>
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">

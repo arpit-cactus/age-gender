@@ -258,9 +258,9 @@ export default function DashboardPage() {
         />
 
         {/* Responsive main container */}
-        <main className="w-full p-5 sm:p-6 lg:p-8 space-y-6">
+        <main className="w-full p-3.5 sm:p-6 lg:p-8 space-y-4 sm:space-y-6">
           {/* Executive Overview Banner */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-xl bg-white border border-slate-200/80 shadow-xs">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 sm:p-5 rounded-xl bg-white border border-slate-200/80 shadow-xs">
             <div className="space-y-1">
               <h2 className="text-base font-bold text-slate-900 tracking-tight">
                 VisionCount Traffic & Demographic Intelligence
@@ -269,7 +269,7 @@ export default function DashboardPage() {
                 Multi-line counting occupancy, continuous timezone traffic distribution, and audience demographic matrix powered by Camsense AI.
               </p>
             </div>
-            <div className="flex items-center gap-3 flex-shrink-0 flex-wrap">
+            <div className="flex items-center gap-2.5 flex-shrink-0 flex-wrap">
               {selectedLineId && (
                 <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-50 border border-indigo-200/60 text-xs font-semibold text-indigo-700">
                   <Split className="h-3.5 w-3.5" />
@@ -300,8 +300,8 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* KPI Cards Row with Period Comparison Deltas */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+          {/* KPI Cards Row with Period Comparison Deltas (2-col grid on mobile for compact viewing) */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5">
             <KpiCard
               title="Total IN"
               value={summary?.total_in ?? 0}

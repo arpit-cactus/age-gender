@@ -532,13 +532,17 @@ export function LineEditor({ camera, onSaved, onOpenLiveStream }: LineEditorProp
     drawCanvas();
   }, [drawCanvas]);
 
-  // Convert mouse event to normalized coords
-  const getCanvasCoords = (e: React.MouseEvent<HTMLCanvasElement>): Point => {
+  // Convert mouse or touch event to normalized coords (0.0 to 1.0)
+  const getCanvasCoords = (
+    e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>
+  ): Point => {
     const canvas = canvasRef.current;
     if (!canvas) return { x: 0, y: 0 };
     const rect = canvas.getBoundingClientRect();
-    const x = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
-    const y = Math.max(0, Math.min(1, (e.clientY - rect.top) / rect.height));
+    const clientX = "touches" in e ? (e.touches[0]?.clientX ?? 0) : e.clientX;
+    const clientY = "touches" in e ? (e.touches[0]?.clientY ?? 0) : e.clientY;
+    const x = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+    const y = Math.max(0, Math.min(1, (clientY - rect.top) / rect.height));
     return { x, y };
   };
 
@@ -562,8 +566,10 @@ export function LineEditor({ camera, onSaved, onOpenLiveStream }: LineEditorProp
     return Math.hypot(px - (ax + t * (bx - ax)), py - (ay + t * (by - ay)));
   };
 
-  // Mouse Down
-  const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
+  // Mouse & Touch Down
+  const handlePointerDown = (
+    e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>
+  ) => {
     const coord = getCanvasCoords(e);
 
     // 1. Check handles of Active Line
@@ -654,8 +660,10 @@ export function LineEditor({ camera, onSaved, onOpenLiveStream }: LineEditorProp
     }
   };
 
-  // Mouse Move
-  const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
+  // Mouse & Touch Move
+  const handlePointerMove = (
+    e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>
+  ) => {
     const coord = getCanvasCoords(e);
 
     if (dragTarget) {
@@ -1185,17 +1193,20 @@ export function LineEditor({ camera, onSaved, onOpenLiveStream }: LineEditorProp
             aspectRatio: `${canvasWidth} / ${canvasHeight}`,
           }}
         >
-          {/* Main Drawing Canvas */}
+          {/* Main Drawing Canvas - supports both desktop mouse and mobile touch */}
           <canvas
             ref={canvasRef}
             width={canvasWidth}
             height={canvasHeight}
-            onMouseDown={handleMouseDown}
-            onMouseMove={handleMouseMove}
+            onMouseDown={handlePointerDown}
+            onMouseMove={handlePointerMove}
             onMouseUp={handleMouseUp}
             onMouseLeave={handleMouseUp}
-            style={{ cursor: cursorStyle }}
-            className="w-full h-full block select-none"
+            onTouchStart={handlePointerDown}
+            onTouchMove={handlePointerMove}
+            onTouchEnd={handleMouseUp}
+            style={{ cursor: cursorStyle, touchAction: "none" }}
+            className="w-full h-full block select-none touch-none"
           />
 
           {/* Loading Snapshot Spinner */}

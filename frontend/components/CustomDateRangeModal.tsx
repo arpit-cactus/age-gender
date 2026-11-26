@@ -128,7 +128,7 @@ export function CustomDateRangeModal({
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200">
+      <div className="bg-white rounded-2xl max-w-md w-full p-4 sm:p-6 shadow-2xl border border-slate-200 max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
           <div className="flex items-center gap-2">
             <div className="p-1.5 bg-indigo-50 rounded-lg text-indigo-600">

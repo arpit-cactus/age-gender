@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { api, User, SystemSettings } from "@/lib/api";
 import { Sidebar } from "@/components/Sidebar";
+import { MobileMenuButton } from "@/components/MobileMenuButton";
 import {
   Sliders,
   Save,
@@ -83,16 +84,19 @@ export default function SettingsPage() {
       <Sidebar currentUser={currentUser} onLogout={() => api.logout().then(() => router.push("/login"))} />
 
       <main className="flex-1 flex flex-col min-w-0">
-        <header className="h-16 bg-white border-b border-slate-200 px-6 flex items-center justify-between sticky top-0 z-20">
-          <div>
-            <h1 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight">
-              System & Detection Settings
-            </h1>
-            <p className="text-xs text-slate-400">Configure real-time AI thresholds and background worker parameters</p>
+        <header className="h-16 bg-white border-b border-slate-200 px-4 sm:px-6 flex items-center justify-between sticky top-0 z-20">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+            <MobileMenuButton />
+            <div className="min-w-0">
+              <h1 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight truncate">
+                System & Detection Settings
+              </h1>
+              <p className="text-xs text-slate-400 truncate hidden sm:block">Configure real-time AI thresholds and background worker parameters</p>
+            </div>
           </div>
         </header>
 
-        <div className="p-5 sm:p-6 lg:p-8 space-y-6 max-w-5xl">
+        <div className="p-3.5 sm:p-6 lg:p-8 space-y-4 sm:space-y-6 max-w-5xl">
           {/* Header Info Card */}
           <div className="p-5 rounded-xl bg-white border border-slate-200/80 shadow-xs flex items-start gap-4">
             <div className="h-9 w-9 rounded-lg bg-indigo-50 border border-indigo-100 text-indigo-700 flex items-center justify-center flex-shrink-0">

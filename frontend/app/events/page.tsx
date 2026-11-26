@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { api, User, Camera, CountEvent } from "@/lib/api";
 import { Sidebar } from "@/components/Sidebar";
+import { MobileMenuButton } from "@/components/MobileMenuButton";
 import { CustomDateRangeModal } from "@/components/CustomDateRangeModal";
 import {
   Download,
@@ -189,18 +190,21 @@ export default function EventsPage() {
       <Sidebar currentUser={currentUser} onLogout={handleLogout} />
 
       <div className="flex-1 flex flex-col min-w-0">
-        <header className="h-16 bg-white border-b border-slate-200 px-6 flex items-center justify-between sticky top-0 z-20">
-          <div>
-            <h1 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight">
-              Event Records & Export
-            </h1>
-            <p className="text-xs text-slate-400">Detailed audit trail with line attribution and demographic cross-filters</p>
+        <header className="h-16 bg-white border-b border-slate-200 px-4 sm:px-6 flex items-center justify-between sticky top-0 z-20">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+            <MobileMenuButton />
+            <div className="min-w-0">
+              <h1 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight truncate">
+                Event Records & Export
+              </h1>
+              <p className="text-xs text-slate-400 truncate hidden sm:block">Detailed audit trail with line attribution and demographic cross-filters</p>
+            </div>
           </div>
 
           <button
             type="button"
             onClick={handleExportCsv}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-lg shadow-xs transition-colors"
+            className="inline-flex items-center gap-1.5 px-3 sm:px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-lg shadow-xs transition-colors flex-shrink-0"
           >
             <Download className="h-3.5 w-3.5" />
             <span>Export CSV</span>
@@ -208,7 +212,7 @@ export default function EventsPage() {
         </header>
 
         {/* Responsive main container */}
-        <main className="w-full p-5 sm:p-6 lg:p-8 space-y-5">
+        <main className="w-full p-3.5 sm:p-6 lg:p-8 space-y-4 sm:space-y-5">
           {/* Filters Bar */}
           <div className="bg-white p-4 rounded-xl border border-slate-200/80 shadow-xs flex flex-wrap items-center justify-between gap-4">
             <div className="flex flex-wrap items-center gap-3">
@@ -386,7 +390,7 @@ export default function EventsPage() {
                 aria-labelledby="events-log-caption"
                 className="overflow-x-auto"
               >
-                <table className="w-full text-left border-collapse">
+                <table className="w-full min-w-[700px] text-left border-collapse">
                   <caption id="events-log-caption" className="sr-only">
                     Count Events Log
                   </caption>

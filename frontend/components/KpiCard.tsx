@@ -49,7 +49,7 @@ export function KpiCard({
 
   if (isLoading) {
     return (
-      <div className="bg-white p-5 rounded-xl border border-slate-200/80 shadow-xs animate-pulse">
+      <div className="bg-white p-3.5 sm:p-5 rounded-xl border border-slate-200/80 shadow-xs animate-pulse">
         <div className="flex items-center justify-between">
           <div className="h-4 w-20 bg-slate-200 rounded"></div>
           <div className="h-8 w-8 bg-slate-200 rounded-lg"></div>
@@ -72,25 +72,25 @@ export function KpiCard({
   const isNegative = hasDelta && (deltaPct as number) < 0;
 
   return (
-    <div className="bg-white p-5 rounded-xl border border-slate-200/80 shadow-xs hover:shadow-sm transition-shadow flex flex-col justify-between">
+    <div className="bg-white p-3.5 sm:p-5 rounded-xl border border-slate-200/80 shadow-xs hover:shadow-sm transition-shadow flex flex-col justify-between">
       <div>
-        <div className="flex items-center justify-between">
-          <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+        <div className="flex items-center justify-between gap-1">
+          <span className="text-[11px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider truncate">
             {title}
           </span>
-          <div className={`p-2 rounded-lg ${styles.iconBg} ${styles.iconColor}`}>
-            <Icon className="h-4 w-4" />
+          <div className={`p-1.5 sm:p-2 rounded-lg ${styles.iconBg} ${styles.iconColor} flex-shrink-0`}>
+            <Icon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
           </div>
         </div>
 
-        <div className="mt-2.5 flex items-baseline gap-2 flex-wrap">
-          <span className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">
+        <div className="mt-2 flex items-baseline gap-1.5 sm:gap-2 flex-wrap">
+          <span className="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-900 tracking-tight">
             {formattedValue}
           </span>
 
           {hasDelta && (
             <span
-              className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[11px] font-semibold ${
+              className={`inline-flex items-center gap-0.5 px-1 sm:px-1.5 py-0.5 rounded text-[10px] sm:text-[11px] font-semibold ${
                 isPositive
                   ? "bg-emerald-50 text-emerald-700"
                   : isNegative
@@ -100,11 +100,11 @@ export function KpiCard({
               title={prevValue !== undefined && prevValue !== null ? `Previous period: ${prevValue}` : undefined}
             >
               {isPositive ? (
-                <TrendingUp className="h-3 w-3" />
+                <TrendingUp className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
               ) : isNegative ? (
-                <TrendingDown className="h-3 w-3" />
+                <TrendingDown className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
               ) : (
-                <Minus className="h-3 w-3" />
+                <Minus className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
               )}
               <span>
                 {isPositive ? "+" : ""}
@@ -115,10 +115,10 @@ export function KpiCard({
         </div>
       </div>
 
-      <div className="mt-2 pt-2 border-t border-slate-100/80 flex items-center justify-between text-xs text-slate-400">
+      <div className="mt-2 pt-2 border-t border-slate-100/80 flex items-center justify-between text-[11px] sm:text-xs text-slate-400 gap-1">
         <span className="truncate">{subtitle || ""}</span>
         {hasDelta && (
-          <span className="text-[10px] text-slate-400 flex-shrink-0 font-medium">
+          <span className="text-[9px] sm:text-[10px] text-slate-400 flex-shrink-0 font-medium hidden sm:inline">
             {deltaLabel}
           </span>
         )}
