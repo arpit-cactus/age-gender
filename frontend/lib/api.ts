@@ -1,5 +1,17 @@
+// In the browser, always use relative path "/api/v1" so the Next.js reverse-proxy
+// forwards requests to FastAPI backend on 127.0.0.1:8000.
+// This prevents browser CORS errors and "Private Network Access" (loopback) blocks
+// when accessed remotely via FRP tunnel (e.g. general.cactusxpo.com:17149).
+function getBrowserApiBase(): string {
+  const envUrl = process.env.NEXT_PUBLIC_API_URL;
+  if (!envUrl || envUrl.includes("localhost") || envUrl.includes("127.0.0.1")) {
+    return "/api/v1";
+  }
+  return envUrl;
+}
+
 const API_BASE_URL = typeof window !== "undefined"
-  ? (process.env.NEXT_PUBLIC_API_URL || "/api/v1")
+  ? getBrowserApiBase()
   : (process.env.INTERNAL_API_URL || "http://127.0.0.1:8000/api/v1");
 
 export interface User {
