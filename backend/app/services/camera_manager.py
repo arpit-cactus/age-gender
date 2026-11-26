@@ -1,5 +1,5 @@
 import threading
-from typing import Dict, Optional
+from typing import Dict, Optional, Tuple
 import cv2
 import numpy as np
 from sqlalchemy.orm import Session
@@ -140,6 +140,13 @@ class CameraManager:
             if worker:
                 return worker.get_annotated_frame_bytes()
             return None
+
+    def get_annotated_frame_if_newer(self, camera_id: int, last_seq: int) -> Tuple[int, Optional[bytes]]:
+        with self._lock:
+            worker = self._workers.get(camera_id)
+            if worker:
+                return worker.get_annotated_frame_if_newer(last_seq)
+            return last_seq, None
 
     def get_snapshot(self, camera_id: int, db: Session) -> bytes:
         # 1. Try to get latest frame from active worker

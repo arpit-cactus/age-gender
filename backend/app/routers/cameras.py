@@ -173,31 +173,28 @@ def stream_camera_feed(
 
     def frame_generator():
         try:
-            last_frame: bytes = b""
+            last_seq = 0
             empty_cycles = 0
             while True:
-                frame_bytes = camera_manager.get_annotated_frame(camera_id)
+                seq, frame_bytes = camera_manager.get_annotated_frame_if_newer(camera_id, last_seq)
                 if frame_bytes:
-                    last_frame = frame_bytes
+                    last_seq = seq
                     empty_cycles = 0
                     yield (
                         b"--frame\r\n"
                         b"Content-Type: image/jpeg\r\n\r\n" + frame_bytes + b"\r\n"
                     )
-                elif last_frame:
-                    yield (
-                        b"--frame\r\n"
-                        b"Content-Type: image/jpeg\r\n\r\n" + last_frame + b"\r\n"
-                    )
                 else:
-                    # Initial spin-up: yield raw snapshot until annotations are ready
-                    raw_snap = camera_manager.get_snapshot(camera_id, db)
-                    if raw_snap:
-                        yield (
-                            b"--frame\r\n"
-                            b"Content-Type: image/jpeg\r\n\r\n" + raw_snap + b"\r\n"
-                        )
-                time.sleep(0.08)
+                    empty_cycles += 1
+                    # Initial spin-up: yield raw snapshot once until worker produces annotated frames
+                    if empty_cycles == 1 and last_seq == 0:
+                        raw_snap = camera_manager.get_snapshot(camera_id, db)
+                        if raw_snap:
+                            yield (
+                                b"--frame\r\n"
+                                b"Content-Type: image/jpeg\r\n\r\n" + raw_snap + b"\r\n"
+                            )
+                time.sleep(0.04) # Smooth ~25Hz check with near-zero CPU; yields only when a new frame is ready
         except (GeneratorExit, Exception):
             pass
         finally:

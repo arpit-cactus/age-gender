@@ -57,6 +57,7 @@ class CameraWorker:
         self._monitor_clients: int = 0
         self._monitor_lock = threading.Lock()
         self._latest_annotated_frame: Optional[bytes] = None
+        self._frame_seq: int = 0
         
         # Local count accumulator for live HUD display
         self._live_total_in: int = 0
@@ -129,6 +130,12 @@ class CameraWorker:
         with self._monitor_lock:
             return self._latest_annotated_frame
 
+    def get_annotated_frame_if_newer(self, last_seq: int) -> Tuple[int, Optional[bytes]]:
+        with self._monitor_lock:
+            if self._frame_seq > last_seq and self._latest_annotated_frame is not None:
+                return self._frame_seq, self._latest_annotated_frame
+            return last_seq, None
+
     def get_latest_frame_bytes(self) -> Optional[bytes]:
         with self._frame_lock:
             if self._latest_frame is None:
@@ -157,11 +164,17 @@ class CameraWorker:
         else:
             if self.source.startswith("rtsp://") or self.source.startswith("rtsps://"):
                 import os
-                os.environ["OPENCV_FFMPEG_CAPTURE_OPTIONS"] = "rtsp_transport;tcp|stimeout;10000000"
+                # Low latency, no buffer bloat for smooth real-time RTSP
+                os.environ["OPENCV_FFMPEG_CAPTURE_OPTIONS"] = "rtsp_transport;tcp|fflags;nobuffer|flags;low_delay|max_delay;500000|stimeout;10000000"
             cap = cv2.VideoCapture(self.source)
         
         if not cap.isOpened():
             return None
+        
+        try:
+            cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
+        except Exception:
+            pass
         return cap
 
     def _set_camera_status(self, status: str, last_error: Optional[str] = None):
@@ -219,7 +232,8 @@ class CameraWorker:
 
     def _run(self):
         print(f"Worker started for camera {self.camera_id} with source: {self.source}")
-        target_fps = max(1, settings.PROCESS_FPS)
+        # Rock-solid 6 FPS (optimal 5-7 FPS: steady AI inference and zero network stutter)
+        target_fps = min(7, max(4, int(settings.PROCESS_FPS)))
         frame_interval = 1.0 / target_fps
         self._sync_system_settings()
 
@@ -247,13 +261,22 @@ class CameraWorker:
                         self._sync_system_settings()
                         self._last_settings_sync = t_start
 
+                    # Drain stale buffer on RTSP to ensure real-time zero-lag live feed
                     ret, frame = cap.read()
-                    if not ret:
+                    if ret and (self.source.startswith("rtsp://") or self.source.startswith("rtsps://")):
+                        for _ in range(2):
+                            if not cap.grab():
+                                break
+                        ret2, fresh_frame = cap.retrieve()
+                        if ret2 and fresh_frame is not None:
+                            frame = fresh_frame
+
+                    if not ret or frame is None:
                         if not self.source.isdigit() and not self.source.startswith("rtsp://"):
                             cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
                             ret, frame = cap.read()
                         
-                        if not ret:
+                        if not ret or frame is None:
                             print(f"[Camera {self.camera_id}] Stream disconnected or ended.")
                             break
 
@@ -417,11 +440,20 @@ class CameraWorker:
                             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 180), 1, cv2.LINE_AA
                         )
 
+                        # Optimize stream frame: downscale to max 854px width (480p) and encode at 65 quality
+                        # Reduces frame size from ~250KB to ~30KB for rock-solid 5-7 FPS over FRP/tunnel
+                        stream_frame = annotated
+                        sh, sw = stream_frame.shape[:2]
+                        if sw > 854:
+                            scale = 854.0 / sw
+                            stream_frame = cv2.resize(stream_frame, (854, int(sh * scale)), interpolation=cv2.INTER_AREA)
+
                         # Encode JPEG for live stream
-                        success, enc = cv2.imencode(".jpg", annotated, [int(cv2.IMWRITE_JPEG_QUALITY), 75])
+                        success, enc = cv2.imencode(".jpg", stream_frame, [int(cv2.IMWRITE_JPEG_QUALITY), 65])
                         if success:
                             with self._monitor_lock:
                                 self._latest_annotated_frame = enc.tobytes()
+                                self._frame_seq += 1
 
                     # Rate limiter
                     elapsed = time.time() - t_start

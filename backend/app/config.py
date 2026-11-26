@@ -15,7 +15,7 @@ class Settings(BaseModel):
     FRONTEND_ORIGIN: str = os.getenv("FRONTEND_ORIGIN", "http://localhost:3000")
     PUBLIC_URL: str = os.getenv("PUBLIC_URL", "http://general.cactusxpo.com")
 
-    PROCESS_FPS: int = int(os.getenv("PROCESS_FPS", "10"))
+    PROCESS_FPS: int = int(os.getenv("PROCESS_FPS", "6"))
     DOUBLE_COUNT_COOLDOWN_SEC: int = int(os.getenv("DOUBLE_COUNT_COOLDOWN_SEC", "10"))
 
 settings = Settings()
