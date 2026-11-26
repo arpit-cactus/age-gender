@@ -183,51 +183,58 @@ echo "   ✓ Admin and Viewer accounts created. No sample data seeded."
 echo ""
 echo "[4/6] Verifying Vision AI Models & Pre-downloading Weights..."
 $PYTHON_BIN -c "
-import os
+import os, sys
 import torch
 from ultralytics import YOLO
 
 # Hardware acceleration check
 if torch.cuda.is_available():
-    print(f'   ✓ NVIDIA GPU detected: {torch.cuda.get_device_name(0)} (CUDA Hardware Acceleration ACTIVE)')
+    print(f'   NVIDIA GPU detected: {torch.cuda.get_device_name(0)} (CUDA ACTIVE)')
 else:
-    print('   ℹ️ No CUDA GPU detected locally. Running in CPU mode (auto-accelerates on CUDA servers).')
+    print('   No CUDA GPU. Running in CPU mode.')
 
-# 1. Person detector model
-yolo = YOLO('yolov8n.pt')
-print('   ✓ YOLOv8n person detector model ready.')
-
-# 2. InsightFace buffalo_s (Fast MobileNet face detector + genderage)
-models_s_dir = os.path.expanduser('~/.insightface/models/buffalo_s')
-os.makedirs(models_s_dir, exist_ok=True)
-import insightface
-from insightface.app import FaceAnalysis
-
-print('   ⏳ Verifying / Downloading InsightFace buffalo_s...')
-app_s = FaceAnalysis(name='buffalo_s', allowed_modules=['detection', 'genderage'], providers=['CUDAExecutionProvider', 'CPUExecutionProvider'])
-app_s.prepare(ctx_id=0, det_size=(320, 320))
-print('   ✓ InsightFace buffalo_s detector ready.')
-
-# 3. InsightFace buffalo_l (High-accuracy ResNet50 face detector)
-models_l_dir = os.path.expanduser('~/.insightface/models/buffalo_l')
-os.makedirs(models_l_dir, exist_ok=True)
-print('   ⏳ Verifying / Downloading InsightFace buffalo_l...')
+# 1. Person detector (YOLOv8n)
 try:
-    app_l = FaceAnalysis(name='buffalo_l', allowed_modules=['detection', 'genderage'], providers=['CUDAExecutionProvider', 'CPUExecutionProvider'])
-    app_l.prepare(ctx_id=0, det_size=(640, 640))
-    print('   ✓ InsightFace buffalo_l detector ready.')
+    yolo = YOLO('yolov8n.pt')
+    print('   YOLOv8n person detector ready.')
 except Exception as e:
-    print(f'   ⚠️ InsightFace buffalo_l note: {e}')
+    print(f'   WARNING: YOLOv8n: {e}')
 
-# 4. MiVOLO v2 SOTA Demographic Transformer
-print('   ⏳ Verifying / Pre-caching MiVOLO v2 Transformer...')
+# 2. InsightFace models — do NOT filter allowed_modules so the pack
+#    can load whichever sub-models it ships (buffalo_s varies by version).
+try:
+    from insightface.app import FaceAnalysis
+    print('   Downloading InsightFace buffalo_s ...')
+    app_s = FaceAnalysis(
+        name='buffalo_s',
+        providers=['CUDAExecutionProvider', 'CPUExecutionProvider']
+    )
+    app_s.prepare(ctx_id=0, det_size=(320, 320))
+    print('   InsightFace buffalo_s ready.')
+except Exception as e:
+    print(f'   WARNING: InsightFace buffalo_s: {e}')
+
+try:
+    from insightface.app import FaceAnalysis
+    print('   Downloading InsightFace buffalo_l ...')
+    app_l = FaceAnalysis(
+        name='buffalo_l',
+        providers=['CUDAExecutionProvider', 'CPUExecutionProvider']
+    )
+    app_l.prepare(ctx_id=0, det_size=(640, 640))
+    print('   InsightFace buffalo_l ready.')
+except Exception as e:
+    print(f'   WARNING: InsightFace buffalo_l: {e}')
+
+# 3. MiVOLO v2 Demographic Transformer
+print('   Downloading MiVOLO v2 weights (may take a few minutes) ...')
 try:
     from transformers import AutoModelForImageClassification, AutoImageProcessor, AutoConfig
     model_id = 'iitolstykh/mivolo_v2'
     AutoConfig.from_pretrained(model_id, trust_remote_code=True)
     AutoImageProcessor.from_pretrained(model_id, trust_remote_code=True)
     AutoModelForImageClassification.from_pretrained(model_id, trust_remote_code=True)
-    print('   ✓ MiVOLO v2 model & processor weights cached.')
+    print('   MiVOLO v2 weights cached.')
 except Exception as e:
     print(f'   ⚠️ MiVOLO v2 pre-cache note: {e}')
 "
