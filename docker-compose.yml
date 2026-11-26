@@ -1,0 +1,52 @@
+version: "3.8"
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: visioncount_db
+    restart: always
+    environment:
+      MYSQL_DATABASE: visioncount
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 10s
+      retries: 5
+
+  api:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: visioncount_api
+    restart: always
+    environment:
+      - DATABASE_URL=mysql+pymysql://root:@db:3306/visioncount
+      - JWT_SECRET=camsense_visioncount_jwt_secret_key_2026
+      - FRONTEND_ORIGIN=http://localhost:3000
+      - PROCESS_FPS=10
+      - DOUBLE_COUNT_COOLDOWN_SEC=10
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  web:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: visioncount_web
+    restart: always
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000/api/v1
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api
+
+volumes:
+  db_data:

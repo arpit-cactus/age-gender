@@ -1,0 +1,8 @@
+# ByteTrack Configuration Optimized for People Counting & Line Crossing
+tracker_type: bytetrack
+track_high_thresh: 0.35 # High-confidence detections
+track_low_thresh: 0.10  # Low-confidence recovery for occluded pedestrians
+new_track_thresh: 0.35  # Threshold to initialize new person tracks
+track_buffer: 60        # Keep track alive for 60 frames (prevents ID switch on occlusion)
+match_thresh: 0.80      # High IoU association threshold to avoid ID swaps
+fuse_score: True        # Fuse detection score with motion
