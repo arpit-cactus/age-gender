@@ -155,9 +155,29 @@ $MYSQL_CMD visioncount -e "ALTER TABLE cameras ADD COLUMN lines_json TEXT NULL;"
 $MYSQL_CMD visioncount -e "ALTER TABLE count_events ADD COLUMN line_id VARCHAR(50) NULL, ADD COLUMN line_name VARCHAR(100) NULL, ADD INDEX idx_camera_line (camera_id, line_id);" 2>/dev/null || true
 echo "   ✓ Database tables created and schema synchronized."
 
-# Seed users and sample data
-$PYTHON_BIN scripts/seed_sample_data.py
-echo "   ✓ Users and initial sample analytics seeded."
+# Seed required user accounts and default system settings via SQL.
+# No dummy analytics data is inserted — the app starts clean.
+ADMIN_HASH=$($PYTHON_BIN -c "import bcrypt; print(bcrypt.hashpw(b'admin123',  bcrypt.gensalt()).decode())")
+VIEWER_HASH=$($PYTHON_BIN -c "import bcrypt; print(bcrypt.hashpw(b'viewer123', bcrypt.gensalt()).decode())")
+
+$MYSQL_CMD visioncount <<EOF
+INSERT INTO users (name, email, password_hash, role, is_active)
+VALUES ('Admin Manager', 'admin@camsense.ai', '$ADMIN_HASH', 'admin', 1)
+ON DUPLICATE KEY UPDATE password_hash=VALUES(password_hash), role=VALUES(role);
+
+INSERT INTO users (name, email, password_hash, role, is_active)
+VALUES ('Viewer Analyst', 'viewer@camsense.ai', '$VIEWER_HASH', 'viewer', 1)
+ON DUPLICATE KEY UPDATE password_hash=VALUES(password_hash), role=VALUES(role);
+
+INSERT IGNORE INTO system_settings (setting_key, setting_value) VALUES
+  ('poll_interval_sec',          '5'),
+  ('process_fps',                '10'),
+  ('double_count_cooldown_sec',  '10'),
+  ('face_conf_threshold',        '0.45'),
+  ('person_conf_threshold',      '0.35'),
+  ('max_face_samples',           '5');
+EOF
+echo "   ✓ Admin and Viewer accounts created. No sample data seeded."
 
 # 4. Download and Verify AI Models
 echo ""
@@ -233,7 +253,7 @@ echo "=================================================================="
 echo "    🎉 VisionCount Setup Completed Successfully!                "
 echo "=================================================================="
 echo ""
-echo "Credentials Seeded:"
+echo "Login Credentials:"
 echo "   • Admin:  admin@camsense.ai  /  admin123"
 echo "   • Viewer: viewer@camsense.ai /  viewer123"
 echo ""
