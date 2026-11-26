@@ -161,6 +161,12 @@ class CameraWorker:
     def _open_capture(self) -> Optional[cv2.VideoCapture]:
         if self.source.isdigit():
             cap = cv2.VideoCapture(int(self.source))
+            try:
+                # Request full high-definition stream for USB / local webcams
+                cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)
+                cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080)
+            except Exception:
+                pass
         else:
             if self.source.startswith("rtsp://") or self.source.startswith("rtsps://"):
                 import os
@@ -175,6 +181,10 @@ class CameraWorker:
             cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
         except Exception:
             pass
+
+        w = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+        h = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+        print(f"[Camera {self.camera_id}] Native stream opened at {w}x{h} (full-resolution AI processing)")
         return cap
 
     def _set_camera_status(self, status: str, last_error: Optional[str] = None):
