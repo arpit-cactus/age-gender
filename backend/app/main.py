@@ -36,18 +36,20 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# CORS setup — includes both the local dev origin and the FRP public URL
+# CORS setup — includes local dev origins, configured URLs, and regex for FRP/tunnels
 origins = [
     settings.FRONTEND_ORIGIN,
     settings.PUBLIC_URL,
     "http://localhost:3000",
     "http://127.0.0.1:3000",
     "http://general.cactusxpo.com",
+    "http://general.cactusxpo.com:17149",
 ]
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
+    allow_origin_regex=r"^https?://(localhost|127\.0\.0\.1|.*\.cactusxpo\.com)(:\d+)?$",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

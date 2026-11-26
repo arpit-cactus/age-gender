@@ -1,11 +1,22 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Public runtime URL — used when the app is accessed via FRP at
-  // http://general.cactusxpo.com/  Set NEXT_PUBLIC_API_BASE in .env
-  // or the systemd service to override for production.
-  env: {
-    NEXT_PUBLIC_API_BASE: process.env.NEXT_PUBLIC_API_BASE || "http://general.cactusxpo.com",
-    NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL || "http://general.cactusxpo.com",
+  // Proxy API calls seamlessly to FastAPI backend so the browser
+  // uses the same origin (no CORS or cookie issues over FRP tunnels)
+  async rewrites() {
+    return [
+      {
+        source: "/api/v1/:path*",
+        destination: "http://127.0.0.1:8000/api/v1/:path*",
+      },
+      {
+        source: "/docs",
+        destination: "http://127.0.0.1:8000/docs",
+      },
+      {
+        source: "/openapi.json",
+        destination: "http://127.0.0.1:8000/openapi.json",
+      },
+    ];
   },
 
   // Allow images served from the FRP domain
