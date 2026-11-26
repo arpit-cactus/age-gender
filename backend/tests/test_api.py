@@ -114,3 +114,12 @@ def test_login_success_and_me():
     assert update_resp.status_code == 200
     assert update_resp.json()["poll_interval_sec"] == 7
     assert update_resp.json()["process_fps"] == 12
+
+def test_export_with_query_token():
+    login_resp = client.post("/api/v1/auth/login", json={"email": "admin@camsense.ai", "password": "admin123"})
+    token = login_resp.json()["access_token"]
+    # Test export without Authorization header, using ?token= query parameter (for window.open)
+    export_resp = client.get(f"/api/v1/events/export?direction=in&token={token}")
+    assert export_resp.status_code == 200
+    assert "text/csv" in export_resp.headers.get("content-type", "")
+    assert "Line ID" in export_resp.text

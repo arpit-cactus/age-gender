@@ -214,11 +214,11 @@ export default function EventsPage() {
         {/* Responsive main container */}
         <main className="w-full p-3.5 sm:p-6 lg:p-8 space-y-4 sm:space-y-5">
           {/* Filters Bar */}
-          <div className="bg-white p-4 rounded-xl border border-slate-200/80 shadow-xs flex flex-wrap items-center justify-between gap-4">
-            <div className="flex flex-wrap items-center gap-3">
+          <div className="bg-white p-3.5 sm:p-4 rounded-xl border border-slate-200/80 shadow-xs flex flex-col lg:flex-row lg:items-center justify-between gap-3.5">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:flex lg:flex-wrap items-center gap-2 sm:gap-2.5 w-full lg:w-auto">
               {/* Camera Filter */}
-              <div className="relative flex items-center">
-                <span className="text-xs font-medium text-slate-500 mr-2">Camera:</span>
+              <div className="relative flex items-center w-full lg:w-auto">
+                <span className="text-[11px] font-medium text-slate-400 mr-1.5 hidden xl:inline">Camera:</span>
                 <select
                   value={selectedCameraId === null ? "" : selectedCameraId}
                   onChange={(e) => {
@@ -226,7 +226,7 @@ export default function EventsPage() {
                     setSelectedLineId("");
                     setPage(1);
                   }}
-                  className="pl-3 pr-8 py-1.5 h-9 text-xs font-medium text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 appearance-none cursor-pointer"
+                  className="w-full lg:w-auto pl-2.5 sm:pl-3 pr-7 py-1.5 h-9 text-xs font-medium text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 appearance-none cursor-pointer"
                 >
                   <option value="">All Cameras</option>
                   {cameras.map((c) => (
@@ -235,22 +235,22 @@ export default function EventsPage() {
                     </option>
                   ))}
                 </select>
-                <div className="absolute right-2.5 pointer-events-none text-slate-400">
+                <div className="absolute right-2 pointer-events-none text-slate-400">
                   <ChevronDown className="h-3.5 w-3.5" />
                 </div>
               </div>
 
               {/* Line Filter */}
               {availableLines.length > 0 && (
-                <div className="relative flex items-center">
-                  <span className="text-xs font-medium text-slate-500 mr-2">Line:</span>
+                <div className="relative flex items-center w-full lg:w-auto">
+                  <span className="text-[11px] font-medium text-slate-400 mr-1.5 hidden xl:inline">Line:</span>
                   <select
                     value={selectedLineId}
                     onChange={(e) => {
                       setSelectedLineId(e.target.value);
                       setPage(1);
                     }}
-                    className="pl-3 pr-8 py-1.5 h-9 text-xs font-medium text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 appearance-none cursor-pointer"
+                    className="w-full lg:w-auto pl-2.5 sm:pl-3 pr-7 py-1.5 h-9 text-xs font-medium text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 appearance-none cursor-pointer"
                   >
                     <option value="">All Lines</option>
                     {availableLines.map((l) => (
@@ -259,44 +259,44 @@ export default function EventsPage() {
                       </option>
                     ))}
                   </select>
-                  <div className="absolute right-2.5 pointer-events-none text-slate-400">
+                  <div className="absolute right-2 pointer-events-none text-slate-400">
                     <ChevronDown className="h-3.5 w-3.5" />
                   </div>
                 </div>
               )}
 
               {/* Direction Filter */}
-              <div className="relative flex items-center">
-                <span className="text-xs font-medium text-slate-500 mr-2">Direction:</span>
+              <div className="relative flex items-center w-full lg:w-auto">
+                <span className="text-[11px] font-medium text-slate-400 mr-1.5 hidden xl:inline">Direction:</span>
                 <select
                   value={direction}
                   onChange={(e) => {
                     setDirection(e.target.value as any);
                     setPage(1);
                   }}
-                  className="pl-3 pr-8 py-1.5 h-9 text-xs font-medium text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 appearance-none cursor-pointer"
+                  className="w-full lg:w-auto pl-2.5 sm:pl-3 pr-7 py-1.5 h-9 text-xs font-medium text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 appearance-none cursor-pointer"
                 >
                   <option value="">All Directions</option>
                   <option value="in">IN Only</option>
                   <option value="out">OUT Only</option>
                 </select>
-                <div className="absolute right-2.5 pointer-events-none text-slate-400">
+                <div className="absolute right-2 pointer-events-none text-slate-400">
                   <ChevronDown className="h-3.5 w-3.5" />
                 </div>
               </div>
 
               {/* Age Group Filter */}
-              <div className="relative flex items-center">
-                <span className="text-xs font-medium text-slate-500 mr-2">Age:</span>
+              <div className="relative flex items-center w-full lg:w-auto">
+                <span className="text-[11px] font-medium text-slate-400 mr-1.5 hidden xl:inline">Age:</span>
                 <select
                   value={ageGroup}
                   onChange={(e) => {
                     setAgeGroup(e.target.value);
                     setPage(1);
                   }}
-                  className="pl-3 pr-8 py-1.5 h-9 text-xs font-medium text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 appearance-none cursor-pointer"
+                  className="w-full lg:w-auto pl-2.5 sm:pl-3 pr-7 py-1.5 h-9 text-xs font-medium text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 appearance-none cursor-pointer"
                 >
-                  <option value="">All Age Groups</option>
+                  <option value="">All Ages</option>
                   <option value="child">Child (0-12)</option>
                   <option value="teen">Teen (13-19)</option>
                   <option value="young_adult">Young Adult (20-35)</option>
@@ -304,39 +304,39 @@ export default function EventsPage() {
                   <option value="senior">Senior (51+)</option>
                   <option value="unknown">Unknown</option>
                 </select>
-                <div className="absolute right-2.5 pointer-events-none text-slate-400">
+                <div className="absolute right-2 pointer-events-none text-slate-400">
                   <ChevronDown className="h-3.5 w-3.5" />
                 </div>
               </div>
 
               {/* Gender Filter */}
-              <div className="relative flex items-center">
-                <span className="text-xs font-medium text-slate-500 mr-2">Gender:</span>
+              <div className="relative flex items-center w-full lg:w-auto">
+                <span className="text-[11px] font-medium text-slate-400 mr-1.5 hidden xl:inline">Gender:</span>
                 <select
                   value={gender}
                   onChange={(e) => {
                     setGender(e.target.value);
                     setPage(1);
                   }}
-                  className="pl-3 pr-8 py-1.5 h-9 text-xs font-medium text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 appearance-none cursor-pointer"
+                  className="w-full lg:w-auto pl-2.5 sm:pl-3 pr-7 py-1.5 h-9 text-xs font-medium text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 appearance-none cursor-pointer"
                 >
                   <option value="">All Genders</option>
                   <option value="male">Male</option>
                   <option value="female">Female</option>
                   <option value="unknown">Unknown</option>
                 </select>
-                <div className="absolute right-2.5 pointer-events-none text-slate-400">
+                <div className="absolute right-2 pointer-events-none text-slate-400">
                   <ChevronDown className="h-3.5 w-3.5" />
                 </div>
               </div>
 
               {/* Timeframe Filter */}
-              <div className="relative flex items-center">
-                <span className="text-xs font-medium text-slate-500 mr-2">Time:</span>
+              <div className="relative flex items-center w-full lg:w-auto">
+                <span className="text-[11px] font-medium text-slate-400 mr-1.5 hidden xl:inline">Time:</span>
                 <select
                   value={dateRange}
                   onChange={(e) => handleDateSelectChange(e.target.value)}
-                  className="pl-3 pr-8 py-1.5 h-9 text-xs font-medium text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 appearance-none cursor-pointer"
+                  className="w-full lg:w-auto pl-2.5 sm:pl-3 pr-7 py-1.5 h-9 text-xs font-medium text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 appearance-none cursor-pointer"
                 >
                   <option value="today">Today</option>
                   <option value="yesterday">Yesterday</option>
@@ -346,7 +346,7 @@ export default function EventsPage() {
                   </option>
                   <option value="all">All Time</option>
                 </select>
-                <div className="absolute right-2.5 pointer-events-none text-slate-400">
+                <div className="absolute right-2 pointer-events-none text-slate-400">
                   <ChevronDown className="h-3.5 w-3.5" />
                 </div>
               </div>
@@ -355,17 +355,19 @@ export default function EventsPage() {
                 <button
                   type="button"
                   onClick={handleClearFilters}
-                  className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors"
+                  className="col-span-2 sm:col-span-1 inline-flex items-center justify-center gap-1 px-3 py-1.5 h-9 text-xs font-semibold text-rose-600 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-lg transition-colors"
                   title="Reset all filters"
                 >
-                  <X className="h-3 w-3" />
+                  <X className="h-3.5 w-3.5" />
                   <span>Clear Filters</span>
                 </button>
               )}
             </div>
 
-            <div className="text-xs font-medium text-slate-500">
-              Showing <strong>{events.length}</strong> of <strong>{total}</strong> records
+            <div className="text-xs font-medium text-slate-500 flex items-center justify-between lg:justify-end gap-2 pt-2 lg:pt-0 border-t lg:border-t-0 border-slate-100">
+              <span>Total: <strong>{total}</strong> records</span>
+              <span className="text-slate-400">•</span>
+              <span>Showing {events.length}</span>
             </div>
           </div>
 

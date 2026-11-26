@@ -460,6 +460,8 @@ export const api = {
     toTime?: string | null
   ): string {
     const searchParams = new URLSearchParams();
+    const token = getAuthToken();
+    if (token) searchParams.set("token", token);
     if (cameraId) searchParams.set("camera_id", cameraId.toString());
     if (lineId) searchParams.set("line_id", lineId);
     if (direction) searchParams.set("direction", direction);
