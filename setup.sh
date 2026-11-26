@@ -53,15 +53,44 @@ echo "   ✓ Python dependencies installed into backend/.venv."
 echo ""
 echo "[3/6] Configuring MySQL database and schema..."
 
-# Detect MySQL connection (root with or without password)
-MYSQL_CMD="mysql -u root"
-if ! $MYSQL_CMD -e "SELECT 1;" >/dev/null 2>&1; then
-    if [ -n "$MYSQL_PWD" ]; then
-        MYSQL_CMD="mysql -u root -p$MYSQL_PWD"
-    else
-        echo "   ℹ️ Prompting for MySQL password if required..."
+# ---------------------------------------------------------------------------
+# Detect which MySQL command works on this machine.
+# Priority:
+#   1. root with no password          (MariaDB default, local dev)
+#   2. sudo mysql (no password)        (Ubuntu/Debian auth_socket default)
+#   3. root with $MYSQL_PWD env var    (CI / Docker with explicit password)
+#   4. interactive password prompt     (fallback)
+# ---------------------------------------------------------------------------
+MYSQL_CMD=""
+
+if mysql -u root -e "SELECT 1;" >/dev/null 2>&1; then
+    MYSQL_CMD="mysql -u root"
+    echo "   Connected as root (no password)."
+
+elif sudo mysql -u root -e "SELECT 1;" >/dev/null 2>&1; then
+    MYSQL_CMD="sudo mysql -u root"
+    echo "   Connected via sudo (auth_socket / Ubuntu default)."
+
+elif [ -n "$MYSQL_PWD" ] && mysql -u root -p"$MYSQL_PWD" -e "SELECT 1;" >/dev/null 2>&1; then
+    MYSQL_CMD="mysql -u root -p$MYSQL_PWD"
+    echo "   Connected as root with MYSQL_PWD env var."
+
+else
+    echo ""
+    echo "   Could not connect to MySQL automatically."
+    echo "   Enter the MySQL root password (leave blank and press Enter if none):"
+    read -rs DB_PASS
+    if [ -z "$DB_PASS" ]; then
         MYSQL_CMD="mysql -u root"
+    else
+        MYSQL_CMD="mysql -u root -p$DB_PASS"
     fi
+    if ! $MYSQL_CMD -e "SELECT 1;" >/dev/null 2>&1; then
+        echo "   ERROR: Could not connect to MySQL with the provided credentials."
+        echo "   Make sure MySQL/MariaDB is running: sudo systemctl start mysql"
+        exit 1
+    fi
+    echo "   Connected as root (manual password)."
 fi
 
 # Create database
